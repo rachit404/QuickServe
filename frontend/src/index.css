@@ -1,0 +1,105 @@
+/*
+ * GLOBAL STYLES
+ * 
+ * This file contains:
+ * 1. Tailwind CSS base imports
+ * 2. Global CSS custom properties (variables)
+ * 3. Base styles that apply everywhere
+ * 
+ * The @tailwind directives inject Tailwind's styles:
+ * - base: Normalize/reset styles
+ * - components: Component classes
+ * - utilities: All utility classes (text-blue-500, etc.)
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+ * CSS CUSTOM PROPERTIES (Variables)
+ * These can be used throughout the app for consistency.
+ */
+:root {
+  --color-primary: #0ea5e9;
+  --color-secondary: #d946ef;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+/*
+ * BASE STYLES
+ * Applied to all elements of that type.
+ */
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+  
+  body {
+    @apply text-gray-900 bg-gray-50;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+  
+  a {
+    @apply text-primary-600 hover:text-primary-700;
+  }
+}
+
+/*
+ * COMPONENT CLASSES
+ * Reusable component styles using @apply.
+ * 
+ * Use sparingly! Prefer Tailwind utilities directly.
+ * Only create component classes for very common patterns.
+ */
+@layer components {
+  /* Primary button style */
+  .btn-primary {
+    @apply px-4 py-2 bg-primary-600 text-white rounded-lg 
+           hover:bg-primary-700 transition-colors
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* Secondary button style */
+  .btn-secondary {
+    @apply px-4 py-2 bg-gray-200 text-gray-700 rounded-lg 
+           hover:bg-gray-300 transition-colors
+           focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  }
+  
+  /* Form input style */
+  .input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+  
+  /* Card container */
+  .card {
+    @apply bg-white rounded-xl shadow-lg p-6;
+  }
+}
+
+/*
+ * UTILITY CLASSES
+ * Custom utilities that Tailwind doesn't provide.
+ */
+@layer utilities {
+  /* Text gradient effect */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600 
+           text-transparent bg-clip-text;
+  }
+  
+  /* Hide scrollbar but keep scrolling */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

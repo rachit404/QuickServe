@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    ╔═══════════════════════════════════════════════════════════════════════════════╗
+    ║                         QUICKSERVE - MAVEN POM FILE                            ║
+    ╠═══════════════════════════════════════════════════════════════════════════════╣
+    ║  This file is the heart of your Maven project. It tells Maven:                 ║
+    ║    1. What dependencies (libraries) your project needs                         ║
+    ║    2. How to build your project                                                ║
+    ║    3. What plugins to use during build                                         ║
+    ║                                                                                ║
+    ║  FOR BEGINNERS:                                                                ║
+    ║  Think of this file as a shopping list for your project. Instead of manually  ║
+    ║  downloading JAR files, you just list what you need here, and Maven fetches   ║
+    ║  everything automatically from the internet (Maven Central Repository).        ║
+    ╚═══════════════════════════════════════════════════════════════════════════════╝
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+    
+    <!-- 
+        ═══════════════════════════════════════════════════════════════════════
+        PROJECT COORDINATES
+        ═══════════════════════════════════════════════════════════════════════
+        These three fields uniquely identify your project in the Maven ecosystem:
+        - groupId: Usually your organization's domain in reverse (com.quickserve)
+        - artifactId: The name of your project/module
+        - version: Current version (SNAPSHOT = work in progress)
+    -->
+    <groupId>com.quickserve</groupId>
+    <artifactId>quickserve-backend</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    
+    <name>QuickServe Backend</name>
+    <description>Local Services Booking Platform - Backend API</description>
+    
+    <!-- 
+        ═══════════════════════════════════════════════════════════════════════
+        SPRING BOOT PARENT
+        ═══════════════════════════════════════════════════════════════════════
+        WHY THIS EXISTS:
+        Instead of manually specifying versions for every Spring dependency,
+        we inherit from Spring Boot's parent POM. This gives us:
+        - Pre-configured dependency versions that work well together
+        - Sensible defaults for plugins
+        - Dependency management so we don't have version conflicts
+        
+        Think of it as inheriting a well-organized recipe book instead of
+        figuring out ingredient quantities yourself.
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.0</version>
+        <relativePath/>
+    </parent>
+    
+    <!-- 
+        ═══════════════════════════════════════════════════════════════════════
+        PROPERTIES
+        ═══════════════════════════════════════════════════════════════════════
+        Centralized place to define versions and settings.
+        This prevents having to update the same version in multiple places.
+    -->
+    <properties>
+        <java.version>17</java.version>
+        <jjwt.version>0.12.3</jjwt.version>
+    </properties>
+    
+    <dependencies>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            SPRING BOOT STARTER WEB
+            ═══════════════════════════════════════════════════════════════════
+            WHAT IT IS:
+            A "starter" is a bundle of related dependencies. This one includes
+            everything needed to build web applications with REST APIs.
+            
+            WHAT IT INCLUDES:
+            - Spring MVC (for handling HTTP requests)
+            - Embedded Tomcat server (so you don't need a separate server)
+            - Jackson (for JSON serialization/deserialization)
+            - Validation support
+            
+            HOW WE USE IT IN QUICKSERVE:
+            Every controller in our application uses this to expose REST endpoints.
+            When a user books a service, the request comes through Spring MVC.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            SPRING BOOT STARTER DATA JPA
+            ═══════════════════════════════════════════════════════════════════
+            WHAT IT IS:
+            JPA (Java Persistence API) is a specification for ORM (Object-Relational
+            Mapping). It lets you work with database tables as Java objects.
+            
+            WHAT IT INCLUDES:
+            - Hibernate (the actual ORM implementation)
+            - Spring Data JPA (simplifies data access with repositories)
+            - Transaction management
+            
+            HOW WE USE IT IN QUICKSERVE:
+            Instead of writing SQL queries manually, we define entities like
+            User, Booking, ServiceProvider as Java classes. Spring Data JPA
+            automatically generates the SQL for us.
+            
+            Example: userRepository.findByEmail(email) 
+            → Automatically becomes: SELECT * FROM users WHERE email = ?
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            POSTGRESQL DRIVER
+            ═══════════════════════════════════════════════════════════════════
+            WHAT IT IS:
+            The JDBC driver that allows Java to communicate with PostgreSQL.
+            
+            WHY POSTGRESQL (and not MySQL or others):
+            - Excellent for complex queries and data integrity
+            - Better support for JSON data types (useful for flexible data)
+            - Superior performance for read-heavy workloads
+            - Open source with strong community support
+            - Perfect for applications that may scale to millions of users
+            
+            HOW WE USE IT IN QUICKSERVE:
+            All our data (users, bookings, service providers) is stored in PostgreSQL.
+            This driver is what makes the connection possible.
+        -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            SPRING BOOT STARTER SECURITY
+            ═══════════════════════════════════════════════════════════════════
+            WHAT IT IS:
+            Comprehensive security framework for authentication and authorization.
+            
+            WHAT IT INCLUDES:
+            - Authentication (verifying who you are)
+            - Authorization (verifying what you can access)
+            - Protection against common attacks (CSRF, XSS, etc.)
+            - Password encoding
+            
+            HOW WE USE IT IN QUICKSERVE:
+            - Users must login to book services
+            - Service providers have different permissions than customers
+            - Admins can access management endpoints
+            - All API endpoints are protected (except login/register)
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            JJWT - JSON WEB TOKEN LIBRARY
+            ═══════════════════════════════════════════════════════════════════
+            WHAT JWT IS:
+            JWT is a compact, URL-safe way to represent claims between two parties.
+            It's like a digitally signed ID card that the server gives you after login.
+            
+            WHY WE USE IT (instead of sessions):
+            - Stateless: Server doesn't need to store session data
+            - Scalable: Works across multiple servers without session sharing
+            - Self-contained: Token carries user info, reducing DB calls
+            - Perfect for mobile apps and SPAs (Single Page Applications)
+            
+            HOW WE USE IT IN QUICKSERVE:
+            1. User logs in with email/password
+            2. Server validates credentials and returns a JWT
+            3. Frontend stores JWT and sends it with every request
+            4. Server validates JWT and knows who the user is
+            
+            NOTE: We need three JJWT libraries:
+            - jjwt-api: The interfaces
+            - jjwt-impl: The implementation
+            - jjwt-jackson: JSON processing support
+        -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            SPRING BOOT STARTER DATA REDIS
+            ═══════════════════════════════════════════════════════════════════
+            WHAT REDIS IS:
+            An in-memory data store - think of it as a super-fast dictionary
+            that lives in RAM. It's MUCH faster than database queries.
+            
+            WHY WE USE IT:
+            - Caching: Store frequently accessed data to reduce DB load
+            - Sessions: Can store session data across servers
+            - Rate limiting: Track API calls to prevent abuse
+            - Temporary data: OTPs, password reset tokens, etc.
+            
+            HOW WE USE IT IN QUICKSERVE:
+            1. CACHING: Service listings that don't change often
+               - Instead of querying DB every time someone browses services,
+                 we cache the results in Redis for faster response.
+            
+            2. OTP STORAGE: When users verify phone/email
+               - Store OTP in Redis with 5-minute expiry
+               - Much simpler than storing in database with cleanup jobs
+            
+            3. SESSION TOKENS: For logout functionality
+               - Store tokens in Redis to enable token blacklisting
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            SPRING BOOT STARTER VALIDATION
+            ═══════════════════════════════════════════════════════════════════
+            WHAT IT IS:
+            Bean Validation API - validates incoming request data automatically.
+            
+            WHY WE USE IT:
+            Instead of manually checking if email is valid, if name is not empty, etc.,
+            we use annotations like @Email, @NotBlank, @Size on our DTOs.
+            
+            HOW WE USE IT IN QUICKSERVE:
+            - @Email on user registration email field
+            - @NotBlank on required fields
+            - @Min/@Max for booking amounts
+            - Automatic error responses when validation fails
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            LOMBOK
+            ═══════════════════════════════════════════════════════════════════
+            WHAT IT IS:
+            A code generator that reduces boilerplate. It generates getters,
+            setters, constructors, etc., at compile time using annotations.
+            
+            WHY WE USE IT:
+            Without Lombok, a simple User class with 10 fields would need:
+            - 10 getter methods
+            - 10 setter methods
+            - Constructors
+            - toString(), equals(), hashCode()
+            That's 50+ lines of boring, repetitive code!
+            
+            With Lombok, we just write @Data and it generates everything.
+            
+            COMMON LOMBOK ANNOTATIONS:
+            - @Data: Generates getters, setters, toString, equals, hashCode
+            - @Builder: Generates builder pattern
+            - @NoArgsConstructor: Generates no-args constructor
+            - @AllArgsConstructor: Generates all-args constructor
+            - @Slf4j: Generates a logger instance
+        -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            SPRINGDOC OPENAPI (SWAGGER)
+            ═══════════════════════════════════════════════════════════════════
+            WHAT IT IS:
+            Automatic API documentation generator. Creates interactive docs
+            where you can test your APIs directly in the browser.
+            
+            WHY WE USE IT:
+            - Frontend developers can see all available endpoints
+            - Testing APIs without writing code
+            - Auto-generated, always up-to-date documentation
+            - Industry standard for REST API documentation
+            
+            HOW TO ACCESS:
+            After starting the server, go to: http://localhost:8080/swagger-ui.html
+        -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        
+        <!-- 
+            ═══════════════════════════════════════════════════════════════════
+            TESTING DEPENDENCIES
+            ═══════════════════════════════════════════════════════════════════
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- 
+            H2 DATABASE - For testing
+            An in-memory database perfect for unit tests.
+            Tests run fast because no real DB connection is needed.
+        -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <!-- 
+                SPRING BOOT MAVEN PLUGIN
+                Packages our application as an executable JAR with embedded Tomcat.
+                Run with: java -jar target/quickserve-backend-1.0.0-SNAPSHOT.jar
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
+</project>

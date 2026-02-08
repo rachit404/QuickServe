@@ -1,0 +1,36 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# QUICKSERVE - DEVELOPMENT PROFILE CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This file is loaded ONLY when running with the 'dev' profile.
+# It overrides or extends settings from application.yml
+#
+# Use this profile for local development by:
+# 1. Setting spring.profiles.active=dev in application.yml (already done)
+# 2. Or: java -jar app.jar --spring.profiles.active=dev
+# 3. Or: In IDE run configuration, add VM argument: -Dspring.profiles.active=dev
+# ═══════════════════════════════════════════════════════════════════════════════
+
+spring:
+  # Development-specific database settings
+  datasource:
+    url: jdbc:postgresql://localhost:5432/quickserve_dev
+    username: postgres
+    password: postgres
+  
+  jpa:
+    hibernate:
+      # In development, update schema automatically
+      # WARNING: Don't use 'update' in production - use migrations!
+      ddl-auto: update
+    
+    # Show SQL in logs for debugging
+    show-sql: true
+
+# More verbose logging in development
+logging:
+  level:
+    root: INFO
+    com.quickserve: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG

@@ -1,0 +1,56 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# QUICKSERVE - PRODUCTION PROFILE CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This file is loaded ONLY when running with the 'prod' profile.
+# Deploy with: java -jar app.jar --spring.profiles.active=prod
+#
+# IMPORTANT PRODUCTION NOTES:
+# 1. Use environment variables for ALL sensitive data
+# 2. Never commit actual production credentials to version control
+# 3. Use stronger security settings
+# ═══════════════════════════════════════════════════════════════════════════════
+
+spring:
+  datasource:
+    # In production, use environment variables
+    # The ${VAR:default} syntax means: use $VAR if set, otherwise use default
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/quickserve_prod}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    
+    hikari:
+      # More connections in production to handle load
+      maximum-pool-size: 20
+      minimum-idle: 5
+  
+  jpa:
+    hibernate:
+      # NEVER use 'update' in production!
+      # Use 'validate' and manage schema changes with Flyway or Liquibase
+      ddl-auto: validate
+    
+    # Don't show SQL in production logs (performance + security)
+    show-sql: false
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+# Production JWT settings - MUST use environment variables!
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+# Less verbose logging in production
+logging:
+  level:
+    root: WARN
+    com.quickserve: INFO
+    org.springframework.security: WARN
+  
+  # Log to file in production
+  file:
+    name: /var/log/quickserve/application.log

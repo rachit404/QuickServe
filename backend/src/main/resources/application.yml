@@ -1,0 +1,171 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# QUICKSERVE - MAIN APPLICATION CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# FOR BEGINNERS:
+# This file is read by Spring Boot when the application starts.
+# It configures how your application connects to databases, Redis, etc.
+# 
+# YAML vs Properties:
+# Spring Boot supports both application.yml and application.properties
+# YAML is more readable for nested configurations, so we use it.
+#
+# PROFILES:
+# We have multiple profiles: dev, prod
+# - dev: For local development (more logging, relaxed security)
+# - prod: For production (optimized, secure)
+# Default profile is 'dev' if not specified.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+spring:
+  application:
+    # Application name - shows up in logs and monitoring tools
+    name: QuickServe
+  
+  # ─────────────────────────────────────────────────────────────────────────────
+  # PROFILES
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Active profile determines which additional config file to load.
+  # application-dev.yml or application-prod.yml will be loaded based on this.
+  # 
+  # To change profile at runtime:
+  # java -jar app.jar --spring.profiles.active=prod
+  profiles:
+    active: dev
+  
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DATABASE CONFIGURATION (JPA + PostgreSQL)
+  # ─────────────────────────────────────────────────────────────────────────────
+  # This section configures:
+  # 1. How to connect to PostgreSQL
+  # 2. How Hibernate (JPA implementation) behaves
+  # 3. Connection pooling settings
+  datasource:
+    # JDBC URL format: jdbc:postgresql://host:port/database_name
+    # For local development, PostgreSQL typically runs on port 5432
+    url: jdbc:postgresql://localhost:5432/quickserve
+    
+    # Database credentials
+    # IMPORTANT: In production, use environment variables!
+    # Example: ${DB_USERNAME:default_value}
+    username: postgres
+    password: postgres
+    
+    # Hikari is the default connection pool in Spring Boot
+    # Connection pooling reuses database connections instead of creating new ones
+    # This is MUCH faster, especially under heavy load
+    hikari:
+      # Maximum connections in the pool
+      # Too few = requests wait; Too many = database overwhelmed
+      # 10 is good for development; increase in production based on load
+      maximum-pool-size: 10
+      
+      # Minimum idle connections kept in pool
+      minimum-idle: 2
+      
+      # How long to wait for a connection before throwing error (30 seconds)
+      connection-timeout: 30000
+  
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JPA / HIBERNATE SETTINGS
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JPA (Java Persistence API) is the specification
+  # Hibernate is the implementation (the actual code that does the work)
+  jpa:
+    # Database platform - tells Hibernate how to generate SQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    
+    hibernate:
+      # DDL (Data Definition Language) auto mode:
+      # - none: Don't touch the schema (production recommendation)
+      # - update: Update schema to match entities (dev convenience, but risky)
+      # - create: Drop and recreate on startup (dangerous, loses data!)
+      # - validate: Just validate, don't change anything
+      #
+      # For production, use 'validate' and manage schema with Flyway/Liquibase
+      ddl-auto: update
+    
+    # Show SQL queries in console (helpful for debugging)
+    show-sql: true
+    
+    properties:
+      hibernate:
+        # Format the SQL nicely in logs (easier to read)
+        format_sql: true
+  
+  # ─────────────────────────────────────────────────────────────────────────────
+  # REDIS CONFIGURATION
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Redis is used for:
+  # 1. Caching frequently accessed data (reduce DB load)
+  # 2. Storing temporary data like OTPs, session tokens
+  # 3. Rate limiting to prevent API abuse
+  data:
+    redis:
+      # Redis server location
+      host: localhost
+      port: 6379
+      # Password (uncomment if your Redis has authentication)
+      # password: your_redis_password
+      
+      # Connection timeout
+      timeout: 5000ms
+  
+  # ─────────────────────────────────────────────────────────────────────────────
+  # CACHE SETTINGS
+  # ─────────────────────────────────────────────────────────────────────────────
+  cache:
+    # Use Redis as the caching provider
+    type: redis
+    redis:
+      # Default TTL (Time To Live) for cached items: 10 minutes
+      # After 10 minutes, cache expires and fresh data is fetched
+      time-to-live: 600000
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SERVER CONFIGURATION
+# ─────────────────────────────────────────────────────────────────────────────
+server:
+  # Port where the application runs
+  # Default is 8080, but you can change it
+  port: 8080
+  
+  servlet:
+    # Base path for all API endpoints
+    # All URLs will start with /api
+    # Example: http://localhost:8080/api/users
+    context-path: /api
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JWT CONFIGURATION
+# ─────────────────────────────────────────────────────────────────────────────
+# Custom properties for JWT (JSON Web Token) authentication
+# These are NOT standard Spring properties; we read them in our code
+jwt:
+  # Secret key for signing tokens
+  # IMPORTANT: In production, this MUST be a long, random string
+  # and stored as an environment variable, never in code!
+  secret: your-super-secret-key-that-should-be-very-long-and-random-in-production
+  
+  # Token expiration time in milliseconds
+  # 86400000ms = 24 hours
+  expiration: 86400000
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LOGGING CONFIGURATION
+# ─────────────────────────────────────────────────────────────────────────────
+logging:
+  level:
+    # Root logger - default level for all loggers
+    root: INFO
+    
+    # More verbose logging for our application code
+    com.quickserve: DEBUG
+    
+    # Hibernate logging
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  
+  pattern:
+    # Console log format
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

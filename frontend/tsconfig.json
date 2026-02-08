@@ -1,0 +1,62 @@
+{
+  "compilerOptions": {
+    /* 
+     * TypeScript Configuration for QuickServe
+     * 
+     * This file tells TypeScript:
+     * - What JavaScript version to compile to
+     * - Where to find source files
+     * - How strict to be with type checking
+     * 
+     * STRICT MODE:
+     * We enable strict mode for better code quality.
+     * This catches bugs at compile time rather than runtime.
+     */
+    
+    // Target modern JavaScript (ES2020)
+    "target": "ES2020",
+    
+    // Use ES modules (import/export syntax)
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    
+    // Allow importing JSON files
+    "resolveJsonModule": true,
+    
+    // Allow default imports from modules without default export
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    
+    // JSX support for React
+    "jsx": "react-jsx",
+    
+    // Strict type-checking options
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    
+    // Path aliases (makes imports cleaner)
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@pages/*": ["src/pages/*"],
+      "@services/*": ["src/services/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@types/*": ["src/types/*"],
+      "@utils/*": ["src/utils/*"]
+    },
+    
+    // Skip library type checking for faster builds
+    "skipLibCheck": true,
+    
+    // Don't emit JS files (Vite handles this)
+    "noEmit": true,
+    
+    // Ensure consistent casing in imports
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
